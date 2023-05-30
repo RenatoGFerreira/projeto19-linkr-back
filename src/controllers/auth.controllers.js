@@ -27,16 +27,18 @@ export async function signIn(req, res) {
   
     try {
       const user = await db.query(`SELECT * FROM users WHERE email=$1`, [email])
-      if(!user) return res.status(404).send("Not found user")
+      if(!user) return res.status(404).send("Not found user.")
 
       const isPasswordCorrect = bcrypt.compareSync(password, user.rows[0].password)
       if(!isPasswordCorrect) return res.status(401).send("Não autorizado")
+
+      console.log(user.rows[0])
   
       const token = uuid()
       console.log(token)
       
       await db.query(`
-      INSERT INTO sessions (user, token)
+      INSERT INTO sessions (email, token)
       VALUES ($1, $2)`, 
       [user.rows[0].email, token])
 
