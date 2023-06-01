@@ -7,7 +7,6 @@ export async function signUp(req, res) {
 
   try {
     const user = await db.query(`SELECT * FROM users WHERE email=$1`, [email])
-
     if (user.rowCount !==0) return res.status(404).send("Email já cadastrado");
     
 
@@ -21,28 +20,33 @@ export async function signUp(req, res) {
   }
 }
 
-
 export async function signIn(req, res) {
     const { email, password } = req.body;
   
     try {
       const user = await db.query(`SELECT * FROM users WHERE email=$1`, [email])
-      if(!user) return res.status(404).send("Not found user.")
+      if(!user) return res.status(404).send("Usuario não encontrado")
 
       const isPasswordCorrect = bcrypt.compareSync(password, user.rows[0].password)
-      if(!isPasswordCorrect) return res.status(401).send("Não autorizado")
+      if(!isPasswordCorrect) return res.status(401).send("Senha incorreta")
 
-      console.log(user.rows[0])
   
       const token = uuid()
-      console.log(token)
+
       
       await db.query(`
-      INSERT INTO sessions (email, token)
+      INSERT INTO sessions ("userId", token)
       VALUES ($1, $2)`, 
-      [user.rows[0].email, token])
+      [user.rows[0].id, token])
 
-      res.status(200).send(token)
+      const userData = {
+        id: user.rows[0].id,
+        image: user.rows[0].image,
+        username: user.rows[0].username,
+        token: token
+      }
+
+      res.status(200).send(userData)
   
     } catch (err) {
       res.status(500).send(err.message);
