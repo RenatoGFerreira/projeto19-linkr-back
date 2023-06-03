@@ -2,6 +2,7 @@ import { db } from "../database/database.js";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
 
+
 export async function signUp(req, res) {
   const { username, email, password, image } = req.body;
 
@@ -59,11 +60,11 @@ export async function signIn(req, res) {
 
 export async function signOut(req, res) {
   const token = res.locals.session;
-
-  console.log(token);
+  
 
   try {
-    await db.query(`DELETE FROM sessions WHERE token=$1;`, [token]);
+    await db.query(`DELETE FROM sessions WHERE token=$1;`, [token.rows[0].token]);
+    res.status(200).send("Sessão encerrada")
   } catch (err) {
     res.status(500).send(err.message);
   }
