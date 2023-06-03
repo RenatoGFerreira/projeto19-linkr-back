@@ -1,4 +1,6 @@
 import { createPostDB, getPostDB } from "../repositories/post.repository.js";
+import { createHashtagsDB } from "../repositories/hashtag.repository.js";
+
 
 export async function sendPost(req, res) {
   const { url, description } = req.body;
@@ -6,6 +8,10 @@ export async function sendPost(req, res) {
 
   try {
     const { rows: [result] } = await createPostDB(url, description, userId);
+
+    if (hashtags && hashtags.length > 0) {
+      await createHashtagsDB(result.id, hashtags);
+    }
 
     res.status(201).send(result);
   } catch (error) {
