@@ -18,3 +18,21 @@ export function getPostDB() {
     LIMIT 20;
   `);
 }
+
+export function deletePostDB(id) {
+  return db.query(
+    `DELETE FROM posts WHERE id=$1`, [id]
+  );
+}
+
+export function getPostIdDB(id) {
+  return db.query(
+    `SELECT * FROM posts WHERE id=$1`, [id]
+  );
+}
+
+export function updatePostDB( id, description) {
+  return db.query(
+    `UPDATE posts SET description=$1 WHERE id=$2`, [description, id]
+  );
+}
