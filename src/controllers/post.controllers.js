@@ -1,5 +1,5 @@
 import { createPostDB, getPostDB,  deletePostDB, getPostIdDB, updatePostDB} from "../repositories/post.repository.js";
-// import { createHashtagsDB } from "../repositories/hashtag.repository.js";
+import { extrairPostsPorHashtag } from "../middleware/extractHashtag.middleware.js";
 
 
 export async function sendPost(req, res) {
@@ -10,11 +10,6 @@ export async function sendPost(req, res) {
 
   try {
     const { rows: [result] } = await createPostDB(url, description, userId);
-  
-
-    // if (hashtags && hashtags.length > 0) {
-    //   await createHashtagsDB(result.id, hashtags);
-    // }
 
     res.status(201).send(result);
   } catch (error) {
@@ -26,13 +21,20 @@ export async function getPost(req, res) {
   try {
     const { rows: posts } = await getPostDB();
 
-    if (posts.rowCount === 0) return res.status(404).send({ message: "posts não existe!" })
+    if (posts.rowCount === 0) return res.status(404).send({ message: "posts não existe!" });
 
-    res.status(200).send(posts);
+    const hashtag = req.params.hashtag; // Obtém a hashtag a partir do parâmetro de caminho (path parameter)
+    if (hashtag) {
+      const postsComHashtag = extrairPostsPorHashtag(posts, hashtag);
+      res.status(200).send(postsComHashtag);
+    } else {
+      res.status(200).send(posts);
+    }
   } catch (error) {
-    res.status(500).send({message: "An error occured while trying to fetch the posts, please refresh the page"});
+    res.status(500).send({ message: "An error occurred while trying to fetch the posts, please refresh the page" });
   }
 }
+
 
 export async function deletePost(req, res) {
   const { userId } = res.locals.session;
