@@ -1,13 +1,5 @@
-export default function extractHashtags(req, res, next) {
-    const { description } = req.body;
-  
-    const regex = /#[a-zA-Z0-9_]+/g;
-    const hashtags = description.match(regex);
-  
-    if (hashtags && hashtags.length > 0) {
-      req.hashtags = hashtags.map((tag) => tag.substring(1));
-    }
-  
-    next();
-  }
-  
+export function extrairPostsPorHashtag(posts, hashtag) {
+  const regex = new RegExp(`#${hashtag}\\b`, 'i');
+  const postsComHashtag = posts.filter(post => regex.test(post.description));
+  return postsComHashtag;
+}
