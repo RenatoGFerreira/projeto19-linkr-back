@@ -1,17 +1,20 @@
 import { createPostDB, getPostDB,  deletePostDB, getPostIdDB, updatePostDB} from "../repositories/post.repository.js";
-import { createHashtagsDB } from "../repositories/hashtag.repository.js";
+// import { createHashtagsDB } from "../repositories/hashtag.repository.js";
 
 
 export async function sendPost(req, res) {
   const { url, description } = req.body;
-  const { userId } = res.locals;
+  const session = res.locals.session;
+
+  const userId = session.rows[0].userId
 
   try {
     const { rows: [result] } = await createPostDB(url, description, userId);
+  
 
-    if (hashtags && hashtags.length > 0) {
-      await createHashtagsDB(result.id, hashtags);
-    }
+    // if (hashtags && hashtags.length > 0) {
+    //   await createHashtagsDB(result.id, hashtags);
+    // }
 
     res.status(201).send(result);
   } catch (error) {
