@@ -69,3 +69,42 @@ export async function updatePost(req, res) {
     res.status(500).send(error.message);
   }
 } 
+
+
+export async function getTopHashtags(req, res) {
+  try {
+    const { rows: posts } = await getPostDB();
+
+    if (posts.rowCount === 0) return res.status(404).send({ message: "Posts não existem!" });
+
+    const hashtagsMap = {}; 
+
+    posts.forEach((post) => {
+      const regex = /#\w+/g; // Expressão regular para encontrar as hashtags
+      const hashtags = post.description.match(regex);
+      
+      if (hashtags) {
+        hashtags.forEach((tag) => {
+          const hashtag = tag.toLowerCase();
+          if (hashtagsMap[hashtag]) {
+            hashtagsMap[hashtag]++;
+          } else {
+            hashtagsMap[hashtag] = 1;
+          }
+        });
+      }
+    });
+
+    // Converte o objeto de frequência de hashtags em um array de pares [hashtag, frequência]
+    const hashtagsArray = Object.entries(hashtagsMap);
+
+    // Ordena o array de hashtags com base na frequência em ordem decrescente
+    hashtagsArray.sort((a, b) => b[1] - a[1]);
+
+    const topHashtags = hashtagsArray.slice(0, 2).map((item) => item[0]);
+
+    res.status(200).send(topHashtags);
+  } catch (error) {
+    res.status(500).send({ message: "Ocorreu um erro ao buscar as hashtags, por favor atualize a página" });
+  }
+}
