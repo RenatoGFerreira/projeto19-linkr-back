@@ -30,3 +30,9 @@ export function getPostIdDB(id) {
     `SELECT * FROM posts WHERE id=$1`, [id]
   );
 }
+
+export function updatePostDB( id, description) {
+  return db.query(
+    `UPDATE posts SET description=$1 WHERE id=$2`, [description, id]
+  );
+}
