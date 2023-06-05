@@ -6,9 +6,10 @@ export async function sendPost(req, res) {
   const { url, description } = req.body;
   const session = res.locals.session;
 
-  const userId = session.rows[0].userId
+  console.log(session.rows[0])
 
   try {
+    const userId = session.rows[0].userId;
     const { rows: [result] } = await createPostDB(url, description, userId);
 
     res.status(201).send(result);
@@ -37,15 +38,14 @@ export async function getPost(req, res) {
 
 
 export async function deletePost(req, res) {
-  const { userId } = res.locals.session;
-  console.log(res.locals);
-  const { id, user } = req.body;
+  const userId = res.locals.session.rows[0].userId;
+  const { id } = req.body;
 
   try {
     const post = await getPostIdDB(id);
+  
     if (!post.rows[0]) return res.status(404).send({ messagem: "Post não encontrado!" })
-
-    if (userId!==user) return res.status(404).send({ messagem: "O usuário não tem autorização para deletar este post!" })
+    if (userId!==post.rows[0].userId) return res.status(404).send({ messagem: "O usuário não tem autorização para deletar este post!" })
     
     await deletePostDB(id);
     res.sendStatus(200);
@@ -55,13 +55,12 @@ export async function deletePost(req, res) {
 }
 
 export async function updatePost(req, res) {
-  const { userId } = res.locals.session;
-  const { id, user, description } = req.body;
+  const userId = res.locals.session.rows[0].userId;
+  const { id, description } = req.body;
   try {
     const post = await getPostIdDB(id);
     if (!post.rows[0]) return res.status(404).send({ messagem: "Post não encontrado!" })
-
-    if (userId!==user) return res.status(404).send({ messagem: "O usuário não tem autorização para alterar este post!" })
+    if (userId!==post.rows[0].userId) return res.status(404).send({ messagem: "O usuário não tem autorização para alterar este post!" })
     
     await updatePostDB(id, description);
     res.sendStatus(200);

@@ -6,6 +6,7 @@ export const postSchema = Joi.object({
 });
 
 export const updateSchema = Joi.object({
+  id: Joi.number().integer().required(),
   description: Joi.string().required()
 });
 
