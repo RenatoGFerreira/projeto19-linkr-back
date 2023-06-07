@@ -6,8 +6,6 @@ export async function sendPost(req, res) {
   const { url, description } = req.body;
   const session = res.locals.session;
 
-  console.log(session.rows[0])
-
   try {
     const userId = session.rows[0].userId;
     const { rows: [result] } = await createPostDB(url, description, userId);
@@ -44,7 +42,7 @@ export async function deletePost(req, res) {
   try {
     const post = await getPostIdDB(id);
   
-    if (!post.rows[0]) return res.status(404).send({ messagem: "Post não encontrado!" })
+    if (!post.rows[0]) return res.status(404).send("Post não encontrado!");
     if (userId!==post.rows[0].userId) return res.status(404).send({ messagem: "O usuário não tem autorização para deletar este post!" })
     
     await deletePostDB(id);

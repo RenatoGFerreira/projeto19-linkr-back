@@ -10,4 +10,7 @@ export const updateSchema = Joi.object({
   description: Joi.string().required()
 });
 
+export const deleteSchema = Joi.object({
+  id: Joi.number().integer().required()
+});
 
