@@ -10,7 +10,7 @@ export function createPostDB(url, description, userId) {
 
 export function getPostDB() {
   return db.query(`
-    SELECT  p.id, u.username AS name, u.image, p.description, p.url, p.likes
+    SELECT  u.id AS "userId", p.id, u.username AS name, u.image, p.description, p.url, p.likes
     FROM users u
     INNER JOIN posts p
     ON u.id = p."userId"
