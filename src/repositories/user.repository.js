@@ -2,8 +2,8 @@ import { db } from "../database/database.js";
 
 export function getPosts(id) {
 
-    return db.query(`
-      SELECT u.id, u.username, u.image, p.description, p.url, p.likes
+  return db.query(`
+      SELECT u.id as "userId", u.username, u.image, p.description, p.id, p.url, p.likes
       FROM users u
       INNER JOIN posts p
       ON u.id = p."userId"
