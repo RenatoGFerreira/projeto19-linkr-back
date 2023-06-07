@@ -6,8 +6,6 @@ export async function sendPost(req, res) {
   const { url, description } = req.body;
   const session = res.locals.session;
 
-  console.log(session.rows[0])
-
   try {
     const userId = session.rows[0].userId;
     const { rows: [result] } = await createPostDB(url, description, userId);
@@ -18,19 +16,24 @@ export async function sendPost(req, res) {
   }
 }
 
-export async function getPost(req, res) {
+export async function getPosts(req, res) {
   try {
     const { rows: posts } = await getPostDB();
+    if (posts.rowCount === 0) return res.status(404).send({ message: "posts não existe!" });
+    res.status(200).send(posts);
+  } catch (error) {
+    res.status(500).send({ message: "An error occurred while trying to fetch the posts, please refresh the page" });
+  }
+}
 
+export async function getPostsByHashtag(req, res) {
+  try {
+    const { rows: posts } = await getPostDB();
     if (posts.rowCount === 0) return res.status(404).send({ message: "posts não existe!" });
 
     const hashtag = req.params.hashtag; // Obtém a hashtag a partir do parâmetro de caminho (path parameter)
-    if (hashtag) {
-      const postsComHashtag = extrairPostsPorHashtag(posts, hashtag);
-      res.status(200).send(postsComHashtag);
-    } else {
-      res.status(200).send(posts);
-    }
+    const postsComHashtag = extrairPostsPorHashtag(posts, hashtag);
+    res.status(200).send(postsComHashtag);
   } catch (error) {
     res.status(500).send({ message: "An error occurred while trying to fetch the posts, please refresh the page" });
   }
@@ -102,7 +105,7 @@ export async function getTopHashtags(req, res) {
     hashtagsArray.sort((a, b) => b[1] - a[1]);
 
     // Obtém as duas hashtags mais utilizadas
-    const topHashtags = hashtagsArray.slice(0, 2).map((item) => item[0]);
+    const topHashtags = hashtagsArray.slice(0, 20).map((item) => item[0]);
 
     res.status(200).send(topHashtags);
   } catch (error) {
