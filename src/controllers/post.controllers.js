@@ -69,15 +69,9 @@ export async function deletePost(req, res) {
 
   try {
     const post = await getPostIdDB(id);
-
-    if (!post.rows[0])
-      return res.status(404).send({ messagem: "Post não encontrado!" });
-    if (userId !== post.rows[0].userId)
-      return res
-        .status(404)
-        .send({
-          messagem: "O usuário não tem autorização para deletar este post!",
-        });
+  
+    if (!post.rows[0]) return res.status(404).send("Post não encontrado!");
+    if (userId !== post.rows[0].userId) return res.status(404).send({ messagem: "O usuário não tem autorização para deletar este post!" })
 
     await deletePostDB(id);
     res.sendStatus(200);
