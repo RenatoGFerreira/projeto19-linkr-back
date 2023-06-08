@@ -10,7 +10,7 @@ export function createPostDB(url, description, userId) {
 
 export function getPostDB() {
   return db.query(`
-    SELECT  p.id, u.username AS name, u.image, p.description, p.url, p.likes
+    SELECT  p.id, u.username AS name, u.id AS "userId", u.image, p.description, p.url, p.likes
     FROM users u
     INNER JOIN posts p
     ON u.id = p."userId"
@@ -31,7 +31,7 @@ export function getPostIdDB(id) {
   );
 }
 
-export function updatePostDB( id, description) {
+export function updatePostDB(id, description) {
   return db.query(
     `UPDATE posts SET description=$1 WHERE id=$2`, [description, id]
   );

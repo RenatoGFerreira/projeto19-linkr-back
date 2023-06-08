@@ -23,7 +23,6 @@ export async function getUserList(req, res) {
             const userList = await db.query(`SELECT id, username, image FROM users WHERE username LIKE $1`, [`%${searchKey}%`]);
 
             //if (userList.rowCount === 0) return res.status(400).send([]);
-
             res.status(201).send(userList.rows);
 
         } catch (err) {
