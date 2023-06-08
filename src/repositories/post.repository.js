@@ -7,7 +7,6 @@ export function createPostDB(url, description, userId) {
     [url, description, userId]
   );
 }
-
 export function getPostDB() {
   return db.query(`
     SELECT  p.*, u.username AS name, u.image, u.id AS "userId", 
@@ -35,7 +34,7 @@ export function getPostIdDB(id) {
   );
 }
 
-export function updatePostDB( id, description) {
+export function updatePostDB(id, description) {
   return db.query(
     `UPDATE posts SET description=$1 WHERE id=$2`, [description, id]
   );
