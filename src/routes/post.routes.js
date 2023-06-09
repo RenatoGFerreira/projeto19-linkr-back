@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { getPost, sendPost, deletePost, updatePost, getTopHashtags } from "../controllers/post.controllers.js";
+import { getPost, sendPost, deletePost, updatePost, getTopHashtags, curtCommentPost, getCurtComments, upLikes } from "../controllers/post.controllers.js";
 import validateAuth from "../middleware/validateAuth.middleware.js";
 import validateSchema from "../middleware/validateSchema.middleware.js";
-import { postSchema, updateSchema, deleteSchema } from "../schemas/post.schema.js";
+import { postSchema, updateSchema, deleteSchema, commentSchema, postIdSchema, likeSchema } from "../schemas/post.schema.js";
 
 
 const postRouter = Router();
@@ -13,5 +13,8 @@ postRouter.get("/hashtag/:hashtag", getPost); // Rota para obter posts por hasht
 postRouter.delete("/post", validateSchema(deleteSchema), validateAuth, deletePost);
 postRouter.put("/post", validateSchema(updateSchema), validateAuth, updatePost);
 postRouter.get("/hashtag", getTopHashtags);
+postRouter.post("/postId", validateSchema(commentSchema), validateAuth, curtCommentPost);
+postRouter.post("/postsId", validateSchema(postIdSchema), getCurtComments); 
+postRouter.put("/postId", validateSchema(likeSchema), validateAuth, upLikes);
 
 export default postRouter;
