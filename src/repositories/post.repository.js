@@ -2,15 +2,16 @@ import { db } from "../database/database.js";
 
 export function createPostDB(url, description, userId) {
   return db.query(
-    `INSERT INTO posts (url, description, "userId")
-        VALUES ($1, $2, $3);`,
+    `INSERT INTO posts (url, description, "userId", "createdAt")
+        VALUES ($1, $2, $3, NOW())
+        RETURNING *;`,
     [url, description, userId]
   );
 }
 
 export function getPostDB() {
   return db.query(`
-    SELECT  p.id, u.username AS name, u.image, p.description, p.url, p.likes
+    SELECT  p.id, u.username AS name, u.image, p.description, p.url, p.likes, p."createdAt"
     FROM users u
     INNER JOIN posts p
     ON u.id = p."userId"
@@ -35,4 +36,10 @@ export function updatePostDB( id, description) {
   return db.query(
     `UPDATE posts SET description=$1 WHERE id=$2`, [description, id]
   );
+}
+
+export function getPostCountDB() {
+  return db.query(`
+    SELECT COUNT(*) AS postCount FROM posts;
+  `).then(result => result.rows[0].postcount);
 }
