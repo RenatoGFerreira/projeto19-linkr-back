@@ -39,3 +39,10 @@ export function updatePostDB(id, description) {
     `UPDATE posts SET description=$1 WHERE id=$2`, [description, id]
   );
 }
+
+
+export function getPostCountDB() {
+  return db.query(`
+    SELECT COUNT(*) AS postCount FROM posts;
+  `).then(result => result.rows[0].postcount);
+}

@@ -4,6 +4,7 @@ import {
   deletePostDB,
   getPostIdDB,
   updatePostDB,
+  getPostCountDB
 } from "../repositories/post.repository.js";
 import { extrairPostsPorHashtag } from "../middleware/extractHashtag.middleware.js";
 import urlMetadata from "url-metadata";
@@ -63,6 +64,20 @@ export async function getPost(req, res) {
   }
 }
 
+
+export async function getPostsByHashtag(req, res) {
+  try {
+    const { rows: posts } = await getPostDB();
+    if (posts.rowCount === 0) return res.status(404).send({ message: "posts não existe!" });
+
+    const hashtag = req.params.hashtag; // Obtém a hashtag a partir do parâmetro de caminho (path parameter)
+    const postsComHashtag = extrairPostsPorHashtag(posts, hashtag);
+    res.status(200).send(postsComHashtag);
+  } catch (error) {
+    res.status(500).send({ message: "An error occurred while trying to fetch the posts, please refresh the page" });
+  }
+}
+
 export async function deletePost(req, res) {
   const userId = res.locals.session.rows[0].userId;
   const { id } = req.body;
@@ -101,18 +116,19 @@ export async function updatePost(req, res) {
   }
 }
 
+
+
+
 export async function getTopHashtags(req, res) {
   try {
     const { rows: posts } = await getPostDB();
 
-    if (posts.rowCount === 0)
-      return res.status(404).send({ message: "Posts não existem!" });
+    if (posts.rowCount === 0) return res.status(404).send({ message: "Posts não existem!" });
 
-    const hashtagsMap = {}; // Mapa para contar a frequência das hashtags
+    const hashtagsMap = {};
 
-    // Percorre todos os posts e conta a frequência das hashtags
     posts.forEach((post) => {
-      const regex = /#\w+/g; // Expressão regular para encontrar as hashtags
+      const regex = /#\w+/g;
       const hashtags = post.description.match(regex);
 
       if (hashtags) {
@@ -127,22 +143,29 @@ export async function getTopHashtags(req, res) {
       }
     });
 
-    // Converte o objeto de frequência de hashtags em um array de pares [hashtag, frequência]
     const hashtagsArray = Object.entries(hashtagsMap);
 
-    // Ordena o array de hashtags com base na frequência em ordem decrescente
     hashtagsArray.sort((a, b) => b[1] - a[1]);
 
-    // Obtém as duas hashtags mais utilizadas
-    const topHashtags = hashtagsArray.slice(0, 2).map((item) => item[0]);
+    const topHashtags = hashtagsArray.slice(0, 20).map((item) => item[0]);
+
+    if (topHashtags.length < 20) {
+      const paddingCount = 20 - topHashtags.length;
+      topHashtags.push(...Array(paddingCount).fill(''));
+    }
 
     res.status(200).send(topHashtags);
   } catch (error) {
-    res
-      .status(500)
-      .send({
-        message:
-          "Ocorreu um erro ao buscar as hashtags, por favor atualize a página",
-      });
+    res.status(500).send({ message: "Ocorreu um erro ao buscar as hashtags, por favor atualize a página" });
+  }
+}
+
+
+export async function getPostCount(req, res) {
+  try {
+    const postCount = await getPostCountDB();
+    res.status(200).send({ postCount });
+  } catch (error) {
+    res.status(500).send({ message: "An error occurred while trying to fetch the post count, please try again later" });
   }
 }
