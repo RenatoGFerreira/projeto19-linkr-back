@@ -118,12 +118,13 @@ export async function updatePost(req, res) {
 
 
 
-
 export async function getTopHashtags(req, res) {
   try {
     const { rows: posts } = await getPostDB();
 
-    if (posts.rowCount === 0) return res.status(404).send({ message: "Posts não existem!" });
+    if (posts.length === 0) {
+      return res.status(404).send({ message: "Posts não existem!" });
+    }
 
     const hashtagsMap = {};
 
@@ -149,13 +150,9 @@ export async function getTopHashtags(req, res) {
 
     const topHashtags = hashtagsArray.slice(0, 20).map((item) => item[0]);
 
-    if (topHashtags.length < 20) {
-      const paddingCount = 20 - topHashtags.length;
-      topHashtags.push(...Array(paddingCount).fill(''));
-    }
-
     res.status(200).send(topHashtags);
   } catch (error) {
+    console.log(error);
     res.status(500).send({ message: "Ocorreu um erro ao buscar as hashtags, por favor atualize a página" });
   }
 }
