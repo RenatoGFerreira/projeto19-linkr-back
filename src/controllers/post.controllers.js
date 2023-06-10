@@ -4,7 +4,11 @@ import {
   deletePostDB,
   getPostIdDB,
   updatePostDB,
-  getPostCountDB
+  getPostCountDB,
+  updateLike, 
+  getComment, 
+  createCurtComment, 
+  nComments
 } from "../repositories/post.repository.js";
 import { extrairPostsPorHashtag } from "../middleware/extractHashtag.middleware.js";
 import urlMetadata from "url-metadata";
@@ -64,7 +68,6 @@ export async function getPost(req, res) {
   }
 }
 
-
 export async function getPostsByHashtag(req, res) {
   try {
     const { rows: posts } = await getPostDB();
@@ -116,8 +119,6 @@ export async function updatePost(req, res) {
   }
 }
 
-
-
 export async function getTopHashtags(req, res) {
   try {
     const { rows: posts } = await getPostDB();
@@ -157,7 +158,6 @@ export async function getTopHashtags(req, res) {
   }
 }
 
-
 export async function getPostCount(req, res) {
   try {
     const postCount = await getPostCountDB();
@@ -166,3 +166,47 @@ export async function getPostCount(req, res) {
     res.status(500).send({ message: "An error occurred while trying to fetch the post count, please try again later" });
   }
 }
+
+export async function getCurtComments(req, res) {
+  const { postId } = req.body;
+  
+  try {
+    const comments = await getComment(postId);
+    const numComments = await nComments(postId);
+    const num = numComments.rows[0];
+    const curtComments = comments.rows;
+    const data = [num, curtComments]
+    res.status(200).send(data);
+
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+}
+
+export async function curtCommentPost(req, res) {
+  const { comments, postId } = req.body;
+  const session = res.locals.session;
+  
+  try {
+    const userId = session.rows[0].userId;
+    await createCurtComment(comments, postId, userId);
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+}
+
+export async function upLikes(req, res) {
+  const userId = res.locals.session.rows[0].userId;
+  const { likes, postId } = req.body;
+  try {
+    const like = await getComment(postId);
+    if (!like.rows[0]) return res.status(404).send({ messagem: "Não há curtidas para este post!" })
+    if (userId!==like.rows[0].userId) return res.status(404).send({ messagem: "O usuário não tem autorização para alterar este post!" })
+    
+    await updateLike(likes, userId, postId);
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+} 
